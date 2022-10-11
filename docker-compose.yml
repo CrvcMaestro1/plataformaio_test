@@ -1,0 +1,33 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:14.4-alpine
+    env_file:
+      - .env
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  base: &base
+    build: .
+
+  web:
+    <<: *base
+    command: bash -c "
+              python manage.py flush --no-input &&
+              python manage.py migrate &&
+              python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  test:
+    <<: *base
+    command: pytest
