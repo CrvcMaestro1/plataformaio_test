@@ -1,0 +1,6 @@
+venv/
+.pytest_cache/
+.env
+.localhost.env
+.idea
+__pycache__/
